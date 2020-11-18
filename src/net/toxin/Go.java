@@ -25,7 +25,7 @@ public class Go extends JFrame {
 
     private int player = 0;
     private int speed = 300;
-    private int count = 3000;
+    private int count = 300;
     private int position = 0;
 
     private int roadWidth = 3000;
@@ -115,23 +115,23 @@ public class Go extends JFrame {
             double x = 0, dx = 0;
 
             for (int n = startPos; n < startPos + 300; n++) {
-                Line l = lines.get(n % count);
-                Line p = lines.get(Math.max(0, n - 1) % count);
+                Line curr = lines.get(n % count);
+                Line prev = lines.get(Math.max(0, n - 1) % count);
 
-                l.project(player - (int) x, positionCam, position);
+                curr.compute(player - (int) x, positionCam, position);
 
                 x += dx;
-                dx += l.curve;
+                dx += curr.curve;
 
                 Color road = colors[0];
                 Color mark = colors[((n / 4) % 2) == 0 ? 0 : 1];
                 Color grass = colors[((n / 2) % 2) == 0 ? 4 : 5];
                 Color rumble = colors[((n / 2) % 2) == 0 ? 3 : 2];
 
-                draw(g, grass, 0, p.sY, W, 0, l.sY, W);
-                draw(g, rumble, p.sX, p.sY, p.sW * 1.2, l.sX, l.sY, l.sW * 1.2);
-                draw(g, road, p.sX, p.sY, p.sW, l.sX, l.sY, l.sW);
-                draw(g, mark, p.sX, p.sY, p.sW * 0.02, l.sX, l.sY, l.sW * 0.02);
+                draw(g, grass, 0, prev.sY, W, 0, curr.sY, W);
+                draw(g, rumble, prev.sX, prev.sY, prev.sW * 1.2, curr.sX, curr.sY, curr.sW * 1.2);
+                draw(g, road, prev.sX, prev.sY, prev.sW, curr.sX, curr.sY, curr.sW);
+                draw(g, mark, prev.sX, prev.sY, prev.sW * 0.02, curr.sX, curr.sY, curr.sW * 0.02);
             }
 
             Color sky = colors[6];
@@ -162,7 +162,7 @@ public class Go extends JFrame {
             if (isUp) position += speed;
             if (isLeft) player -= speed;
             if (isRight) player += speed;
-            if (isDown) position -= speed;
+            if (isDown && position >= speed) position -= speed;
 
             view.repaint();
         }
@@ -199,7 +199,7 @@ public class Go extends JFrame {
             this.dX = this.dY = this.dZ = this.curve = 0;
         }
 
-        public void project(int camX, int camY, int camZ) {
+        public void compute(int camX, int camY, int camZ) {
             this.scale = depthCam / (this.dZ - camZ);
             this.sX = (1 + scale * (dX - camX)) * W / 2;
             this.sY = (1 - scale * (dY - camY)) * H / 2;
