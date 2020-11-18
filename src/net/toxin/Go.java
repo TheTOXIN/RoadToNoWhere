@@ -1,9 +1,12 @@
 package net.toxin;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +18,7 @@ public class Go extends JFrame {
     private final Color[] colors = new Color[6];
     private final DrawPanel panel = new DrawPanel();
     private final List<Line> lines = new ArrayList<>();
+    public final Image car = new ImageIcon("res/7.png").getImage();
 
     private int player = 0;
     private int speed = 200;
@@ -59,6 +63,19 @@ public class Go extends JFrame {
         this.colors[3] = Color.WHITE;
         this.colors[4] = Color.RED;
         this.colors[5] = Color.BLUE;
+
+        this.music();
+    }
+
+    private void music() {
+        try {
+            Clip clip = AudioSystem.getClip();
+            clip.open(AudioSystem.getAudioInputStream(new File("res/7.wav")));
+            clip.loop(7);
+            clip.start();
+        } catch (Exception exc) {
+            exc.printStackTrace(System.out);
+        }
     }
 
     private class DrawPanel extends JPanel {
@@ -82,19 +99,21 @@ public class Go extends JFrame {
                 x += dx;
                 dx += l.curve;
 
+                Color road = colors[0];
+                Color mark = colors[((n / 4) % 2) == 0 ? 0 : 3];
                 Color grass = colors[((n / 2) % 2) == 0 ? 1 : 2];
                 Color rumble = colors[((n / 2) % 2) == 0 ? 3 : 4];
-                Color mark = colors[((n / 4) % 2) == 0 ? 0 : 3];
-                Color road = colors[0];
 
                 draw(g, grass, 0, p.sY, W, 0, l.sY, W);
                 draw(g, rumble, p.sX, p.sY, p.sW * 1.2, l.sX, l.sY, l.sW * 1.2);
                 draw(g, road, p.sX, p.sY, p.sW, l.sX, l.sY, l.sW);
-                draw(g, mark, p.sX, p.sY, p.sW * 0.05, l.sX, l.sY, l.sW * 0.05);
+                draw(g, mark, p.sX, p.sY, p.sW * 0.02, l.sX, l.sY, l.sW * 0.02);
             }
 
             g.setColor(Color.BLUE);
             g.fillRect(0, 0, W, H / 2);
+
+            g.drawImage(car, W / 2 - 300 / 2, H / 2 + 50, 300, 300, null);
         }
 
         public void draw(Graphics g, Color c, double x1, double y1, double w1, double x2, double y2, double w2) {
