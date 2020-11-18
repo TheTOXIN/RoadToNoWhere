@@ -18,7 +18,9 @@ public class Go extends JFrame {
     private final Color[] colors = new Color[6];
     private final DrawPanel panel = new DrawPanel();
     private final List<Line> lines = new ArrayList<>();
-    public final Image car = new ImageIcon("res/7.png").getImage();
+
+    private final Image car = new ImageIcon("res/7.png").getImage();
+    private final File sound = new File("res/7.wav");
 
     private int player = 0;
     private int speed = 200;
@@ -63,7 +65,7 @@ public class Go extends JFrame {
     private void music() {
         try {
             Clip clip = AudioSystem.getClip();
-            clip.open(AudioSystem.getAudioInputStream(new File("res/7.wav")));
+            clip.open(AudioSystem.getAudioInputStream(this.sound));
             clip.loop(7);
             clip.start();
         } catch (Exception exc) {

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="RoadToNoWhere:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/RoadToNoWhere_jar</output-path>
+    <root id="archive" name="RoadToNoWhere.jar">
+      <element id="module-output" name="RoadToNoWhere" />
+    </root>
+  </artifact>
+</component>
