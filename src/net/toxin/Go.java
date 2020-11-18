@@ -4,8 +4,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,41 +15,48 @@ public class Go extends JFrame {
     private static final int H = 768;
 
     private final Color[] colors = new Color[6];
-    private final DrawPanel panel = new DrawPanel();
+    private final View view = new View();
+    private final Controller controller = new Controller();
     private final List<Line> lines = new ArrayList<>();
 
     private final Image car = new ImageIcon("res/7.png").getImage();
     private final File sound = new File("res/7.wav");
 
     private int player = 0;
-    private int speed = 200;
+    private int speed = 300;
     private int count = 3000;
     private int position = 0;
 
-    private int roadWidth = 2000;
-    private int segmentLen = 200;
+    private int roadWidth = 3000;
+    private int segmentLen = 300;
     private int positionCam = 1500;
     private float depthCam = 0.75f;
+
+    private boolean isUp, isLeft, isRight, isDown;
 
     public Go() {
         this.init();
 
         super.setDefaultCloseOperation(EXIT_ON_CLOSE);
         super.setFocusTraversalKeysEnabled(false);
-        super.addKeyListener(new KeyListener());
+        super.addKeyListener(controller);
         super.setLocationRelativeTo(null);
         super.setTitle("RoadToNoWhere");
         super.setLocation(0, 0);
         super.setResizable(false);
         super.setFocusable(true);
         super.setVisible(true);
-        super.add(panel);
+        super.add(view);
 
         super.pack();
     }
 
     private void init() {
         this.generate();
+
+        Timer timer = new Timer(60, controller);
+        timer.setInitialDelay(0);
+        timer.start();
 
         this.colors[0] = Color.BLACK;
         this.colors[1] = new Color(16, 200, 16);
@@ -94,7 +100,7 @@ public class Go extends JFrame {
         }
     }
 
-    private class DrawPanel extends JPanel {
+    private class View extends JPanel {
 
         @Override
         protected void paintComponent(Graphics g) {
@@ -146,15 +152,38 @@ public class Go extends JFrame {
         }
     }
 
-    private class KeyListener extends KeyAdapter {
+    private class Controller implements KeyListener, ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (isUp) position += speed;
+            if (isLeft) player -= speed;
+            if (isRight) player += speed;
+            if (isDown) position -= speed;
+
+            view.repaint();
+        }
+
         @Override
         public void keyPressed(KeyEvent e) {
-            if (e.getKeyCode() == KeyEvent.VK_UP) position += speed;
-            if (e.getKeyCode() == KeyEvent.VK_LEFT) player -= speed;
-            if (e.getKeyCode() == KeyEvent.VK_RIGHT) player += speed;
-            if (e.getKeyCode() == KeyEvent.VK_DOWN && position >= speed) position -= speed;
+            processKey(e.getKeyCode(), true);
+        }
 
-            panel.repaint();
+        @Override
+        public void keyReleased(KeyEvent e) {
+            processKey(e.getKeyCode(), false);
+        }
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+            // nothing
+        }
+
+        private void processKey(int code, boolean press) {
+            if (code == KeyEvent.VK_W) isUp = press;
+            else if (code == KeyEvent.VK_A) isLeft = press;
+            else if (code == KeyEvent.VK_S) isDown = press;
+            else if (code == KeyEvent.VK_D) isRight = press;
         }
     }
 
