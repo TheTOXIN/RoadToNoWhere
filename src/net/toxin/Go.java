@@ -13,7 +13,7 @@ public class Go extends JFrame {
     private static final int H = 768;
 
     private final Color[] colors = new Color[6];
-    private final DrawPanel panel = new DrawPanel();
+    private final View panel = new View();
     private final List<Line> lines = new ArrayList<>();
 
     private int player = 0;
@@ -31,7 +31,7 @@ public class Go extends JFrame {
 
         super.setDefaultCloseOperation(EXIT_ON_CLOSE);
         super.setFocusTraversalKeysEnabled(false);
-        super.addKeyListener(new KeyListener());
+        super.addKeyListener(new Controller());
         super.setLocationRelativeTo(null);
         super.setTitle("RoadToNoWhere");
         super.setLocation(0, 0);
@@ -61,7 +61,7 @@ public class Go extends JFrame {
         this.colors[5] = Color.BLUE;
     }
 
-    private class DrawPanel extends JPanel {
+    private class View extends JPanel {
 
         @Override
         protected void paintComponent(Graphics g) {
@@ -74,23 +74,23 @@ public class Go extends JFrame {
             double x = 0, dx = 0;
 
             for (int n = startPos; n < startPos + 300; n++) {
-                Line l = lines.get(n % count);
-                Line p = lines.get(Math.max(0, n - 1) % count);
+                Line curr = lines.get(n % count);
+                Line prev = lines.get(Math.max(0, n - 1) % count);
 
-                l.project(player - (int) x, positionCam, position);
+                curr.compute(player - (int) x, positionCam, position);
 
                 x += dx;
-                dx += l.curve;
+                dx += curr.curve;
 
                 Color grass = colors[((n / 2) % 2) == 0 ? 1 : 2];
                 Color rumble = colors[((n / 2) % 2) == 0 ? 3 : 4];
                 Color mark = colors[((n / 4) % 2) == 0 ? 0 : 3];
                 Color road = colors[0];
 
-                draw(g, grass, 0, p.sY, W, 0, l.sY, W);
-                draw(g, rumble, p.sX, p.sY, p.sW * 1.2, l.sX, l.sY, l.sW * 1.2);
-                draw(g, road, p.sX, p.sY, p.sW, l.sX, l.sY, l.sW);
-                draw(g, mark, p.sX, p.sY, p.sW * 0.05, l.sX, l.sY, l.sW * 0.05);
+                draw(g, grass, 0, prev.sY, W, 0, curr.sY, W);
+                draw(g, rumble, prev.sX, prev.sY, prev.sW * 1.2, curr.sX, curr.sY, curr.sW * 1.2);
+                draw(g, road, prev.sX, prev.sY, prev.sW, curr.sX, curr.sY, curr.sW);
+                draw(g, mark, prev.sX, prev.sY, prev.sW * 0.05, curr.sX, curr.sY, curr.sW * 0.05);
             }
 
             g.setColor(Color.BLUE);
@@ -111,7 +111,7 @@ public class Go extends JFrame {
         }
     }
 
-    private class KeyListener extends KeyAdapter {
+    private class Controller extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_UP) position += speed;
@@ -132,7 +132,7 @@ public class Go extends JFrame {
             this.dX = this.dY = this.dZ = this.curve = 0;
         }
 
-        public void project(int camX, int camY, int camZ) {
+        public void compute(int camX, int camY, int camZ) {
             this.scale = depthCam / (this.dZ - camZ);
             this.sX = (1 + scale * (dX - camX)) * W / 2;
             this.sY = (1 - scale * (dY - camY)) * H / 2;
