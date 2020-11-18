@@ -11,16 +11,17 @@ import java.util.List;
 
 public class Go extends JFrame {
 
-    private static final int W = 1600;
     private static final int H = 768;
+    private static final int W = 1600;
 
-    private final Color[] colors = new Color[6];
     private final View view = new View();
     private final Controller controller = new Controller();
+
+    private final Color[] colors = new Color[7];
     private final List<Line> lines = new ArrayList<>();
 
-    private final Image car = new ImageIcon("res/7.png").getImage();
     private final File sound = new File("res/7.wav");
+    private final Image car = new ImageIcon("res/7.png").getImage();
 
     private int player = 0;
     private int speed = 300;
@@ -59,11 +60,12 @@ public class Go extends JFrame {
         timer.start();
 
         this.colors[0] = Color.BLACK;
-        this.colors[1] = new Color(16, 200, 16);
-        this.colors[2] = new Color(0, 154, 0);
-        this.colors[3] = Color.WHITE;
-        this.colors[4] = Color.RED;
-        this.colors[5] = Color.BLUE;
+        this.colors[1] = Color.WHITE;
+        this.colors[2] = Color.RED;
+        this.colors[3] = Color.YELLOW;
+        this.colors[4] = new Color(16, 200, 16);
+        this.colors[5] = new Color(0, 154, 0);
+        this.colors[6] = new Color(0, 136, 255);
 
         this.music();
     }
@@ -122,9 +124,9 @@ public class Go extends JFrame {
                 dx += l.curve;
 
                 Color road = colors[0];
-                Color mark = colors[((n / 4) % 2) == 0 ? 0 : 3];
-                Color grass = colors[((n / 2) % 2) == 0 ? 1 : 2];
-                Color rumble = colors[((n / 2) % 2) == 0 ? 3 : 4];
+                Color mark = colors[((n / 4) % 2) == 0 ? 0 : 1];
+                Color grass = colors[((n / 2) % 2) == 0 ? 4 : 5];
+                Color rumble = colors[((n / 2) % 2) == 0 ? 3 : 2];
 
                 draw(g, grass, 0, p.sY, W, 0, l.sY, W);
                 draw(g, rumble, p.sX, p.sY, p.sW * 1.2, l.sX, l.sY, l.sW * 1.2);
@@ -132,7 +134,8 @@ public class Go extends JFrame {
                 draw(g, mark, p.sX, p.sY, p.sW * 0.02, l.sX, l.sY, l.sW * 0.02);
             }
 
-            g.setColor(Color.BLUE);
+            Color sky = colors[6];
+            g.setColor(sky);
             g.fillRect(0, 0, W, H / 2);
 
             g.drawImage(car, W / 2 - 300 / 2, H / 2 + 50, 300, 300, null);
