@@ -22,7 +22,7 @@ public class Go extends JFrame {
 
     private int player = 0;
     private int speed = 200;
-    private int count = 1500;
+    private int count = 3000;
     private int position = 0;
 
     private int roadWidth = 2000;
@@ -48,14 +48,7 @@ public class Go extends JFrame {
     }
 
     private void init() {
-        for (int i = 0; i < count; i++) {
-            Line line = new Line();
-            line.dZ = i * segmentLen;
-
-            if (i > 100 && i < 300) line.curve = -0.5; // TODO RANDOM
-
-            this.lines.add(line);
-        }
+        this.generate();
 
         this.colors[0] = Color.BLACK;
         this.colors[1] = new Color(16, 200, 16);
@@ -75,6 +68,27 @@ public class Go extends JFrame {
             clip.start();
         } catch (Exception exc) {
             exc.printStackTrace(System.out);
+        }
+    }
+
+    private void generate() {
+        double roadAngel = 0;
+        int roadLen = 0;
+
+        for (int i = 0; i < count; i++) {
+            Line line = new Line();
+
+            if (roadLen == 0) {
+                if (Math.random() < 0.5) roadAngel = Math.random() * 2.0 - 1.0;
+                roadLen = (int) (5.0 * Math.random()) * 50;
+            } else {
+                line.curve = roadAngel;
+                roadLen--;
+            }
+
+            line.dZ = i * segmentLen;
+
+            this.lines.add(line);
         }
     }
 
