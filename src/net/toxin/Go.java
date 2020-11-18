@@ -46,7 +46,7 @@ public class Go extends JFrame {
     private void init() {
         for (int i = 0; i < count; i++) {
             Line line = new Line();
-            line.z = i * segmentLen;
+            line.dZ = i * segmentLen;
 
             if (i > 100 && i < 300) line.curve = -0.5; // TODO RANDOM
 
@@ -84,20 +84,22 @@ public class Go extends JFrame {
 
                 Color grass = colors[((n / 2) % 2) == 0 ? 1 : 2];
                 Color rumble = colors[((n / 2) % 2) == 0 ? 3 : 4];
+                Color mark = colors[((n / 4) % 2) == 0 ? 0 : 3];
                 Color road = colors[0];
 
-                draw(g, grass, 0, (int) p.sY, W, 0, (int) l.sY, W);
-                draw(g, rumble, (int) p.sX, (int) p.sY, (int) (p.sW * 1.2), (int) l.sX, (int) l.sY, (int) (l.sW * 1.2));
-                draw(g, road, (int) p.sX, (int) p.sY, (int) (p.sW), (int) l.sX, (int) l.sY, (int) (l.sW));
+                draw(g, grass, 0, p.sY, W, 0, l.sY, W);
+                draw(g, rumble, p.sX, p.sY, p.sW * 1.2, l.sX, l.sY, l.sW * 1.2);
+                draw(g, road, p.sX, p.sY, p.sW, l.sX, l.sY, l.sW);
+                draw(g, mark, p.sX, p.sY, p.sW * 0.05, l.sX, l.sY, l.sW * 0.05);
             }
 
             g.setColor(Color.BLUE);
             g.fillRect(0, 0, W, H / 2);
         }
 
-        public void draw(Graphics g, Color c, int x1, int y1, int w1, int x2, int y2, int w2) {
-            int[] xp = {x1 - w1, x2 - w2, x2 + w2, x1 + w1};
-            int[] yp = {y1, y2, y2, y1};
+        public void draw(Graphics g, Color c, double x1, double y1, double w1, double x2, double y2, double w2) {
+            int[] xp = {(int) (x1 - w1), (int) (x2 - w2), (int) (x2 + w2), (int) (x1 + w1)};
+            int[] yp = {(int) y1, (int) y2, (int) y2, (int) y1};
 
             g.setColor(c);
             g.fillPolygon(xp, yp, 4);
@@ -122,18 +124,18 @@ public class Go extends JFrame {
     }
 
     private class Line {
-        double x, y, z;
+        double dX, dY, dZ;
         double sX, sY, sW;
         double scale, curve;
 
         public Line() {
-            this.x = this.y = this.z = this.curve = 0;
+            this.dX = this.dY = this.dZ = this.curve = 0;
         }
 
         public void project(int camX, int camY, int camZ) {
-            this.scale = depthCam / (this.z - camZ);
-            this.sX = (1 + scale * (x - camX)) * W / 2;
-            this.sY = (1 - scale * (y - camY)) * H / 2;
+            this.scale = depthCam / (this.dZ - camZ);
+            this.sX = (1 + scale * (dX - camX)) * W / 2;
+            this.sY = (1 - scale * (dY - camY)) * H / 2;
             this.sW = scale * roadWidth * W / 2;
         }
     }
