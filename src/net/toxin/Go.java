@@ -11,61 +11,54 @@ import java.util.List;
 
 public class Go extends JFrame {
 
-    private static final int H = 768;
+    private static final String TITLE = "RoadToNoWhere";
+
+    private static final float FPS = 60.0f;
+    private static final float FOV = 0.75f;
+
     private static final int W = 1600;
+    private static final int H = 768;
 
     private final View view = new View();
+    private final Generator generator = new Generator();
     private final Controller controller = new Controller();
 
-    private final Color[] colors = new Color[7];
+    private final int speed = 300;
+    private final int roadCount = 300;
+    private final int roadWidth = 2000;
+    private final int segmentLen = 200;
+    private final int positionCam = 1500;
+
     private final List<Line> lines = new ArrayList<>();
 
     private final File sound = new File("res/7.wav");
     private final Image car = new ImageIcon("res/7.png").getImage();
 
     private int player = 0;
-    private int speed = 300;
-    private int count = 300;
+    private int counter = 0;
     private int position = 0;
-
-    private int roadWidth = 3000;
-    private int segmentLen = 300;
-    private int positionCam = 1500;
-    private float depthCam = 0.75f;
-
-    private boolean isUp, isLeft, isRight, isDown;
 
     public Go() {
         this.init();
 
         super.setDefaultCloseOperation(EXIT_ON_CLOSE);
         super.setFocusTraversalKeysEnabled(false);
-        super.addKeyListener(controller);
+        super.addKeyListener(this.controller);
         super.setLocationRelativeTo(null);
-        super.setTitle("RoadToNoWhere");
         super.setLocation(0, 0);
         super.setResizable(false);
         super.setFocusable(true);
         super.setVisible(true);
-        super.add(view);
+        super.setTitle(TITLE);
+        super.add(this.view);
 
         super.pack();
     }
 
     private void init() {
-        this.generate();
-
-        Timer timer = new Timer(60, controller);
+        Timer timer = new Timer((int) FPS, this.controller);
         timer.setInitialDelay(0);
         timer.start();
-
-        this.colors[0] = Color.BLACK;
-        this.colors[1] = Color.WHITE;
-        this.colors[2] = Color.RED;
-        this.colors[3] = Color.YELLOW;
-        this.colors[4] = new Color(16, 200, 16);
-        this.colors[5] = new Color(0, 154, 0);
-        this.colors[6] = new Color(0, 136, 255);
 
         this.music();
     }
@@ -81,61 +74,45 @@ public class Go extends JFrame {
         }
     }
 
-    private void generate() {
-        double roadAngel = 0;
-        int roadLen = 0;
-
-        for (int i = 0; i < count; i++) {
-            Line line = new Line();
-
-            if (roadLen == 0) {
-                if (Math.random() < 0.5) roadAngel = Math.random() * 2.0 - 1.0;
-                roadLen = (int) (5.0 * Math.random()) * 50;
-            } else {
-                line.curve = roadAngel;
-                roadLen--;
-            }
-
-            line.dZ = i * segmentLen;
-
-            this.lines.add(line);
-        }
-    }
-
     private class View extends JPanel {
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            render(g);
+
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            render(g2);
         }
 
-        private void render(Graphics g) {
+        private void render(Graphics2D g) {
             int startPos = position / segmentLen;
             double x = 0, dx = 0;
 
-            for (int n = startPos; n < startPos + 300; n++) {
-                Line curr = lines.get(n % count);
-                Line prev = lines.get(Math.max(0, n - 1) % count);
+            for (int n = startPos; n < startPos + roadCount; n++) {
+                if (n >= counter) new Line();
+
+                Line curr = lines.get(n);
+                Line prev = lines.get(Math.max(0, n - 1));
 
                 curr.compute(player - (int) x, positionCam, position);
 
                 x += dx;
                 dx += curr.curve;
 
-                Color road = colors[0];
-                Color mark = colors[((n / 4) % 2) == 0 ? 0 : 1];
-                Color grass = colors[((n / 2) % 2) == 0 ? 4 : 5];
-                Color rumble = colors[((n / 2) % 2) == 0 ? 3 : 2];
+                Color grass = ((n / 2) % 2) == 0 ? Palette.GRASS_1 : Palette.GRASS_2;
+                Color rumble = ((n / 2) % 2) == 0 ? Palette.RUMBLE_1 : Palette.RUMBLE_2;
+                Color mark = ((n / 4) % 2) == 0 ? Palette.ROAD : Palette.MARK;
+                Color road = Palette.ROAD;
 
                 draw(g, grass, 0, prev.sY, W, 0, curr.sY, W);
                 draw(g, rumble, prev.sX, prev.sY, prev.sW * 1.2, curr.sX, curr.sY, curr.sW * 1.2);
                 draw(g, road, prev.sX, prev.sY, prev.sW, curr.sX, curr.sY, curr.sW);
-                draw(g, mark, prev.sX, prev.sY, prev.sW * 0.02, curr.sX, curr.sY, curr.sW * 0.02);
+                draw(g, mark, prev.sX, prev.sY, prev.sW * 0.05, curr.sX, curr.sY, curr.sW * 0.05);
             }
 
-            Color sky = colors[6];
-            g.setColor(sky);
+            g.setColor(Palette.SKY);
             g.fillRect(0, 0, W, H / 2);
 
             g.drawImage(car, W / 2 - 300 / 2, H / 2 + 50, 300, 300, null);
@@ -155,13 +132,15 @@ public class Go extends JFrame {
         }
     }
 
-    private class Controller implements KeyListener, ActionListener {
+    private class Controller extends KeyAdapter implements ActionListener {
+
+        private boolean isUp, isLeft, isRight, isDown;
 
         @Override
         public void actionPerformed(ActionEvent e) {
             if (isUp) position += speed;
-            if (isLeft) player -= speed;
-            if (isRight) player += speed;
+            if (isLeft) player -= speed / 2;
+            if (isRight) player += speed / 2;
             if (isDown && position >= speed) position -= speed;
 
             view.repaint();
@@ -175,11 +154,6 @@ public class Go extends JFrame {
         @Override
         public void keyReleased(KeyEvent e) {
             processKey(e.getKeyCode(), false);
-        }
-
-        @Override
-        public void keyTyped(KeyEvent e) {
-            // nothing
         }
 
         private void processKey(int code, boolean press) {
@@ -196,15 +170,45 @@ public class Go extends JFrame {
         double scale, curve;
 
         public Line() {
-            this.dX = this.dY = this.dZ = this.curve = 0;
+            generator.generate(this);
+            this.dZ = counter * segmentLen;
         }
 
         public void compute(int camX, int camY, int camZ) {
-            this.scale = depthCam / (this.dZ - camZ);
+            this.scale = FOV / (this.dZ - camZ);
             this.sX = (1 + scale * (dX - camX)) * W / 2;
             this.sY = (1 - scale * (dY - camY)) * H / 2;
             this.sW = scale * roadWidth * W / 2;
         }
+    }
+
+    private class Generator {
+        double roadAngel;
+        int roadLen;
+
+        private void generate(Line line) {
+            counter++;
+
+            if (roadLen == 0) {
+                if (Math.random() < 0.5) roadAngel = Math.random() * 2.0 - 1.0;
+                roadLen = (int) (5.0 * Math.random()) * 50;
+            } else {
+                line.curve = roadAngel;
+                roadLen--;
+            }
+
+            lines.add(line);
+        }
+    }
+
+    private static class Palette {
+        private final static Color SKY = Color.BLUE;
+        private static final Color ROAD = Color.BLACK;
+        private static final Color MARK = Color.WHITE;
+        private static final Color RUMBLE_1 = Color.RED;
+        private static final Color RUMBLE_2 = Color.YELLOW;
+        private static final Color GRASS_1 = new Color(0, 154, 0);
+        private static final Color GRASS_2 = new Color(16, 200, 16);
     }
 
     public static void main(String[] args) {
