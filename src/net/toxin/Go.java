@@ -16,9 +16,6 @@ public class Go extends JFrame {
     private static final int W = 1600;
     private static final int H = 768;
 
-    private final Color[] colors = new Color[6];
-    private final List<Line> lines = new ArrayList<>();
-
     private final View view = new View();
     private final Generator generator = new Generator();
     private final Controller controller = new Controller();
@@ -28,6 +25,8 @@ public class Go extends JFrame {
     private final int roadWidth = 2000;
     private final int segmentLen = 200;
     private final int positionCam = 1500;
+
+    private final List<Line> lines = new ArrayList<>();
 
     private int player = 0;
     private int counter = 0;
@@ -54,13 +53,6 @@ public class Go extends JFrame {
         Timer timer = new Timer((int) FPS, this.controller);
         timer.setInitialDelay(0);
         timer.start();
-
-        this.colors[0] = Color.BLACK;
-        this.colors[1] = new Color(16, 200, 16);
-        this.colors[2] = new Color(0, 154, 0);
-        this.colors[3] = Color.WHITE;
-        this.colors[4] = Color.RED;
-        this.colors[5] = Color.BLUE;
     }
 
     private class View extends JPanel {
@@ -86,10 +78,10 @@ public class Go extends JFrame {
                 x += dx;
                 dx += curr.curve;
 
-                Color grass = colors[((n / 2) % 2) == 0 ? 1 : 2];
-                Color rumble = colors[((n / 2) % 2) == 0 ? 3 : 4];
-                Color mark = colors[((n / 4) % 2) == 0 ? 0 : 3];
-                Color road = colors[0];
+                Color grass = ((n / 2) % 2) == 0 ? Palette.GRASS_1 : Palette.GRASS_2;
+                Color rumble = ((n / 2) % 2) == 0 ? Palette.RUMBLE_1 : Palette.RUMBLE_2;
+                Color mark = ((n / 4) % 2) == 0 ? Palette.ROAD : Palette.MARK;
+                Color road = Palette.ROAD;
 
                 draw(g, grass, 0, prev.sY, W, 0, curr.sY, W);
                 draw(g, rumble, prev.sX, prev.sY, prev.sW * 1.2, curr.sX, curr.sY, curr.sW * 1.2);
@@ -97,7 +89,7 @@ public class Go extends JFrame {
                 draw(g, mark, prev.sX, prev.sY, prev.sW * 0.05, curr.sX, curr.sY, curr.sW * 0.05);
             }
 
-            g.setColor(Color.BLUE);
+            g.setColor(Palette.SKY);
             g.fillRect(0, 0, W, H / 2);
         }
 
@@ -182,6 +174,17 @@ public class Go extends JFrame {
 
             lines.add(line);
         }
+    }
+
+    private static class Palette {
+
+        private final static Color SKY = Color.BLUE;
+        private static final Color ROAD = Color.BLACK;
+        private static final Color MARK = Color.WHITE;
+        private static final Color RUMBLE_1 = Color.RED;
+        private static final Color RUMBLE_2 = Color.YELLOW;
+        private static final Color GRASS_1 = new Color(16, 200, 16);
+        private static final Color GRASS_2 = new Color(0, 154, 0);
     }
 
     public static void main(String[] args) {
