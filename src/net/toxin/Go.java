@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,9 +13,10 @@ public class Go extends JFrame {
     private static final int W = 1600;
     private static final int H = 768;
 
-    private final Color[] colors = new Color[6];
     private final View panel = new View();
+    private final Color[] colors = new Color[6];
     private final List<Line> lines = new ArrayList<>();
+    private final Generator generator = new Generator();
 
     private final int speed = 200;
     private final int roadCount = 300;
@@ -64,8 +66,6 @@ public class Go extends JFrame {
         private void render(Graphics g) {
             int startPos = position / segmentLen;
             double x = 0, dx = 0;
-
-            System.out.println(startPos);
 
             for (int n = startPos; n < startPos + roadCount; n++) {
                  if (n >= counter) new Line();
@@ -125,14 +125,8 @@ public class Go extends JFrame {
         double scale, curve;
 
         public Line() {
-            counter++;
-
-            this.dX = this.dY = this.curve = 0;
+            generator.generate(this);
             this.dZ = counter * segmentLen;
-
-            if (counter > 100 && counter < 300) this.curve = -0.5; // TODO RANDOM
-
-            lines.add(this);
         }
 
         public void compute(int camX, int camY, int camZ) {
@@ -140,6 +134,25 @@ public class Go extends JFrame {
             this.sX = (1 + scale * (dX - camX)) * W / 2;
             this.sY = (1 - scale * (dY - camY)) * H / 2;
             this.sW = scale * roadWidth * W / 2;
+        }
+    }
+
+    private class Generator {
+        double roadAngel;
+        int roadLen;
+
+        private void generate(Line line) {
+            counter++;
+
+            if (roadLen == 0) {
+                if (Math.random() < 0.5) roadAngel = Math.random() * 2.0 - 1.0;
+                roadLen = (int) (5.0 * Math.random()) * 50;
+            } else {
+                line.curve = roadAngel;
+                roadLen--;
+            }
+
+            lines.add(line);
         }
     }
 
