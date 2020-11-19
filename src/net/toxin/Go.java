@@ -60,10 +60,14 @@ public class Go extends JFrame {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            render(g);
+
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            render(g2);
         }
 
-        private void render(Graphics g) {
+        private void render(Graphics2D g) {
             int startPos = position / segmentLen;
             double x = 0, dx = 0;
 
@@ -177,14 +181,13 @@ public class Go extends JFrame {
     }
 
     private static class Palette {
-
         private final static Color SKY = Color.BLUE;
         private static final Color ROAD = Color.BLACK;
         private static final Color MARK = Color.WHITE;
         private static final Color RUMBLE_1 = Color.RED;
         private static final Color RUMBLE_2 = Color.YELLOW;
-        private static final Color GRASS_1 = new Color(16, 200, 16);
-        private static final Color GRASS_2 = new Color(0, 154, 0);
+        private static final Color GRASS_1 = new Color(0, 154, 0);
+        private static final Color GRASS_2 = new Color(16, 200, 16);
     }
 
     public static void main(String[] args) {
