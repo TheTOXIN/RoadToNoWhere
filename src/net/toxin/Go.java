@@ -16,15 +16,16 @@ public class Go extends JFrame {
     private final View panel = new View();
     private final List<Line> lines = new ArrayList<>();
 
-    private int player = 0;
-    private int speed = 200;
-    private int count = 1500;
-    private int position = 0;
+    private final int speed = 200;
+    private final int roadCount = 300;
+    private final int roadWidth = 2000;
+    private final int segmentLen = 200;
+    private final int positionCam = 1500;
+    private final float depthCam = 0.75f;
 
-    private int roadWidth = 2000;
-    private int segmentLen = 200;
-    private int positionCam = 1500;
-    private float depthCam = 0.75f;
+    private int player = 0;
+    private int counter = 0;
+    private int position = 0;
 
     public Go() {
         this.init();
@@ -44,15 +45,6 @@ public class Go extends JFrame {
     }
 
     private void init() {
-        for (int i = 0; i < count; i++) {
-            Line line = new Line();
-            line.dZ = i * segmentLen;
-
-            if (i > 100 && i < 300) line.curve = -0.5; // TODO RANDOM
-
-            this.lines.add(line);
-        }
-
         this.colors[0] = Color.BLACK;
         this.colors[1] = new Color(16, 200, 16);
         this.colors[2] = new Color(0, 154, 0);
@@ -73,9 +65,13 @@ public class Go extends JFrame {
             int startPos = position / segmentLen;
             double x = 0, dx = 0;
 
-            for (int n = startPos; n < startPos + 300; n++) {
-                Line curr = lines.get(n % count);
-                Line prev = lines.get(Math.max(0, n - 1) % count);
+            System.out.println(startPos);
+
+            for (int n = startPos; n < startPos + roadCount; n++) {
+                 if (n >= counter) new Line();
+
+                Line curr = lines.get(n);
+                Line prev = lines.get(Math.max(0, n - 1));
 
                 curr.compute(player - (int) x, positionCam, position);
 
@@ -129,7 +125,14 @@ public class Go extends JFrame {
         double scale, curve;
 
         public Line() {
-            this.dX = this.dY = this.dZ = this.curve = 0;
+            counter++;
+
+            this.dX = this.dY = this.curve = 0;
+            this.dZ = counter * segmentLen;
+
+            if (counter > 100 && counter < 300) this.curve = -0.5; // TODO RANDOM
+
+            lines.add(this);
         }
 
         public void compute(int camX, int camY, int camZ) {
