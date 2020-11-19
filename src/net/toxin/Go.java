@@ -11,7 +11,7 @@ import java.util.List;
 
 public class Go extends JFrame {
 
-    private static final String TITLE = "RoadToNoWhere";
+    private static final String TITLE = "RoadToTunnel";
 
     private static final float FPS = 60.0f;
     private static final float FOV = 0.75f;
