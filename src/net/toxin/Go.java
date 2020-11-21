@@ -24,7 +24,7 @@ public class Go extends JFrame {
     private final Controller controller = new Controller();
 
     private final int sizeObj = 300;
-    private final int speedCar = 200;
+    private final int speedCar = 300;
     private final int roadCount = 300;
     private final int roadWidth = 2000;
     private final int segmentLen = 200;
@@ -120,10 +120,14 @@ public class Go extends JFrame {
             }
 
             for (int n = startPos; n < startPos + roadCount; n++) {
-                Line curr = lines.get(n);
-                if (n == 300 - 1) {
-                    int size = computeSize((int) curr.sY);
-                    g.drawImage(max, (int) curr.sX - size / 2, (int) curr.sY - size, size, size, null);
+                if (n % 100 == 0) {
+                    Line curr = lines.get(n);
+
+                    int msize = computeSize((int) curr.sY);
+                    int mx = (int) curr.sX - msize / 2;
+                    int my = (int) curr.sY - msize;
+
+                    g.drawImage(max, mx, my, msize, msize, null);
                 }
             }
 
@@ -219,6 +223,10 @@ public class Go extends JFrame {
         int result = size * (y - point) / (H - point);
 
         return Math.min(result, this.sizeObj);
+    }
+
+    public int rand(int from, int to) {
+        return from + (int) (Math.random() * ((to - from) + 1));
     }
 
     private static class Palette {
