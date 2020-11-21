@@ -13,7 +13,7 @@ public class Go extends JFrame {
 
     private static final String TITLE = "RoadToTunnel";
 
-    private static final float FPS = 60.0f;
+    private static final float FPS = 30.0f;
     private static final float FOV = 0.75f;
 
     private static final int W = 1600;
@@ -23,7 +23,8 @@ public class Go extends JFrame {
     private final Generator generator = new Generator();
     private final Controller controller = new Controller();
 
-    private final int speed = 300;
+    private final int sizeObj = 300;
+    private final int speedCar = 200;
     private final int roadCount = 300;
     private final int roadWidth = 2000;
     private final int segmentLen = 200;
@@ -33,6 +34,8 @@ public class Go extends JFrame {
 
     private final File sound = new File("res/7.wav");
     private final Image car = new ImageIcon("res/7.png").getImage();
+    private final Image max = new ImageIcon("res/m.png").getImage();
+    private final Image zavod = new ImageIcon("res/z.jpg").getImage();
 
     private int player = 0;
     private int counter = 0;
@@ -90,6 +93,10 @@ public class Go extends JFrame {
             int startPos = position / segmentLen;
             double x = 0, dx = 0;
 
+            g.setColor(Palette.SKY);
+            g.fillRect(0, 0, W, H / 2);
+            g.drawImage(zavod, 0, 0, W, H / 2, null);
+
             for (int n = startPos; n < startPos + roadCount; n++) {
                 if (n >= counter) new Line();
 
@@ -112,10 +119,15 @@ public class Go extends JFrame {
                 draw(g, mark, prev.sX, prev.sY, prev.sW * 0.05, curr.sX, curr.sY, curr.sW * 0.05);
             }
 
-            g.setColor(Palette.SKY);
-            g.fillRect(0, 0, W, H / 2);
+            for (int n = startPos; n < startPos + roadCount; n++) {
+                Line curr = lines.get(n);
+                if (n == 300 - 1) {
+                    int size = computeSize((int) curr.sY);
+                    g.drawImage(max, (int) curr.sX - size / 2, (int) curr.sY - size, size, size, null);
+                }
+            }
 
-            g.drawImage(car, W / 2 - 300 / 2, H / 2 + 50, 300, 300, null);
+            g.drawImage(car, W / 2 - sizeObj / 2, H / 2 + 50, sizeObj, sizeObj, null);
         }
 
         public void draw(Graphics g, Color c, double x1, double y1, double w1, double x2, double y2, double w2) {
@@ -138,10 +150,10 @@ public class Go extends JFrame {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (isUp) position += speed;
-            if (isLeft) player -= speed / 2;
-            if (isRight) player += speed / 2;
-            if (isDown && position >= speed) position -= speed;
+            if (isUp) position += speedCar;
+            if (isLeft) player -= speedCar / 2;
+            if (isRight) player += speedCar / 2;
+            if (isDown && position >= speedCar) position -= speedCar;
 
             view.repaint();
         }
@@ -201,8 +213,16 @@ public class Go extends JFrame {
         }
     }
 
+    public int computeSize(int y) {
+        int point = H / 2;
+        int size = (sizeObj + 100);
+        int result = size * (y - point) / (H - point);
+
+        return Math.min(result, this.sizeObj);
+    }
+
     private static class Palette {
-        private final static Color SKY = Color.BLUE;
+        private static final Color SKY = Color.BLUE;
         private static final Color ROAD = Color.BLACK;
         private static final Color MARK = Color.WHITE;
         private static final Color RUMBLE_1 = Color.RED;
