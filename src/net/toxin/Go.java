@@ -68,9 +68,12 @@ public class Go extends JFrame {
         }
 
         private void render(Graphics2D g) {
+            int camMax = H;
             int startPos = position / segmentLen;
             double x = 0, dx = 0;
-            int camMax = H;
+
+            g.setColor(Palette.SKY);
+            g.fillRect(0, 0, W, H);
 
             for (int n = startPos; n < startPos + roadCount; n++) {
                 if (n >= counter) new Line();
@@ -97,9 +100,6 @@ public class Go extends JFrame {
                 draw(g, road, prev.sX, prev.sY, prev.sW, curr.sX, curr.sY, curr.sW);
                 draw(g, mark, prev.sX, prev.sY, prev.sW * 0.05, curr.sX, curr.sY, curr.sW * 0.05);
             }
-
-            g.setColor(Palette.SKY);
-            g.fillRect(0, 0, W, H / 2);
         }
 
         public void draw(Graphics g, Color c, double x1, double y1, double w1, double x2, double y2, double w2) {
