@@ -10,7 +10,7 @@ public class Go extends JFrame {
 
     private static final String TITLE = "RoadToNoWhere";
 
-    private static final float FPS = 60.0f;
+    private static final float FPS = 30.0f;
     private static final float FOV = 0.75f;
 
     private static final int W = 1600;
@@ -70,6 +70,7 @@ public class Go extends JFrame {
         private void render(Graphics2D g) {
             int startPos = position / segmentLen;
             double x = 0, dx = 0;
+            int camMax = H;
 
             for (int n = startPos; n < startPos + roadCount; n++) {
                 if (n >= counter) new Line();
@@ -77,10 +78,14 @@ public class Go extends JFrame {
                 Line curr = lines.get(n);
                 Line prev = lines.get(Math.max(0, n - 1));
 
-                curr.compute(player - (int) x, positionCam, position);
+                int camHeight = positionCam + (int) lines.get(startPos).dY;
+                curr.compute(player - (int) x, camHeight, position);
 
                 x += dx;
                 dx += curr.curve;
+
+                if (curr.sY > camMax) continue;
+                camMax = (int) curr.sY;
 
                 Color grass = ((n / 2) % 2) == 0 ? Palette.GRASS_1 : Palette.GRASS_2;
                 Color rumble = ((n / 2) % 2) == 0 ? Palette.RUMBLE_1 : Palette.RUMBLE_2;
@@ -175,6 +180,8 @@ public class Go extends JFrame {
                 line.curve = roadAngel;
                 roadLen--;
             }
+
+            if (counter > 750) line.dY = Math.sin(counter / 30.0) * positionCam;
 
             lines.add(line);
         }
