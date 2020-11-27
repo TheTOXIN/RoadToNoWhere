@@ -23,8 +23,12 @@ public class Go extends JFrame {
     private final Generator generator = new Generator();
     private final Controller controller = new Controller();
 
+    private final float turn = 0.4f;
+    private final float drift = 0.2f;
+    private final float turbo = 5.0f;
+
     private final int sizeObj = 300;
-    private final int speedCar = 300;
+    private final int maxSpeed = 300;
     private final int roadCount = 300;
     private final int roadWidth = 2000;
     private final int segmentLen = 200;
@@ -37,6 +41,7 @@ public class Go extends JFrame {
     private final Image max = new ImageIcon("res/m.png").getImage();
     private final Image zavod = new ImageIcon("res/z.jpg").getImage();
 
+    private int speed = 0;
     private int player = 0;
     private int counter = 0;
     private int position = 0;
@@ -97,6 +102,11 @@ public class Go extends JFrame {
             g.fillRect(0, 0, W, H / 2);
             g.drawImage(zavod, 0, 0, W, H / 2, null);
 
+            if (startPos != 0 && speed != 0) {
+                Line line = lines.get(startPos);
+                player += (int) (speed * drift * line.curve) * -1;
+            }
+
             for (int n = startPos; n < startPos + roadCount; n++) {
                 if (n >= counter) new Line();
 
@@ -119,7 +129,7 @@ public class Go extends JFrame {
                 draw(g, mark, prev.sX, prev.sY, prev.sW * 0.05, curr.sX, curr.sY, curr.sW * 0.05);
             }
 
-            for (int n = startPos; n < startPos + roadCount; n++) {
+            for (int n = startPos + roadCount - 1; n >= startPos; n--) {
                 if (n % 100 == 0) {
                     Line curr = lines.get(n);
 
@@ -154,10 +164,21 @@ public class Go extends JFrame {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (isUp) position += speedCar;
-            if (isLeft) player -= speedCar / 2;
-            if (isRight) player += speedCar / 2;
-            if (isDown && position >= speedCar) position -= speedCar;
+            if (isUp) speed += Math.round(turbo);
+            if (isLeft) player -= speed * turn;
+            if (isRight) player += speed * turn;
+            if (isDown) speed -= Math.round(turbo);
+
+            if (!isUp && !isDown) {
+                if (speed > 0) {
+                    speed = Math.max(0, speed -= turbo);
+                } else {
+                    speed = Math.min(0, speed += turbo);
+                }
+            }
+
+            speed = Math.max(maxSpeed * -1, Math.min(speed, maxSpeed));
+            position = Math.max(0, position += speed);
 
             view.repaint();
         }
