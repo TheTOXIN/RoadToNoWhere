@@ -99,7 +99,7 @@ public class Go extends JFrame {
             double x = 0, dx = 0;
 
             g.setColor(Palette.SKY);
-            g.fillRect(0, 0, W, H / 2);
+            g.fillRect(0, 0, W, H);
             g.drawImage(zavod, 0, 0, W, H / 2, null);
 
             if (startPos != 0 && speed != 0) {
